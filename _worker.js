@@ -237,20 +237,22 @@ export default {
                             const 优选API的IP = await 请求优选API(优选API);
                             const 完整优选IP = [...new Set(优选IP.concat(优选API的IP))];
                             订阅内容 = 完整优选IP.map(原始地址 => {
-                                // 统一正则: 匹配 域名/IPv4/IPv6地址 + 可选端口 + 可选备注
-                                // 示例: 
-                                //   - 域名: hj.xmm1993.top:2096#备注 或 example.com
-                                //   - IPv4: 166.0.188.128:443#Los Angeles 或 166.0.188.128
-                                //   - IPv6: [2606:4700::]:443#CMCC 或 [2606:4700::]
-                                const regex = /^(\[[\da-fA-F:]+\]|[\d.]+|[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*)(?::(\d+))?(?:#(.+))?$/;
-                                const match = 原始地址.match(regex);
+                             // === 国家简称 → 国旗 Emoji ===
+                        function 国旗(countryCode) {
+                        if (!countryCode) return '';
+                           countryCode = countryCode.toUpperCase().trim();
+                        if (!/^[A-Z]{2}$/.test(countryCode)) return ''; // 只处理2位国家码
+                        return String.fromCodePoint(
+                           countryCode.charCodeAt(0) + 0x1F1E6 - 65,
+                           countryCode.charCodeAt(1) + 0x1F1E6 - 65
+    );
+}
 
-                                let 节点地址, 节点端口 = "443", 节点备注;
+                          // 如果备注是国家简称（例如：SG / JP / US）
+                        if (节点备注 && /^[A-Za-z]{2}$/.test(节点备注.trim())) {
+                            节点备注 = 国旗(节点备注.trim());
+}
 
-                                if (match) {
-                                    节点地址 = match[1];  // IP地址或域名(可能带方括号)
-                                    节点端口 = match[2] || "443";  // 端口,默认443
-                                    节点备注 = match[3] || 节点地址;  // 备注,默认为地址本身
                                 } else {
                                     // 不规范的格式，跳过处理返回null
                                     console.warn(`[订阅内容] 不规范的IP格式已忽略: ${原始地址}`);
@@ -1429,3 +1431,4 @@ async function html1101(host, 访问IP) {
 </body>
 </html>`;
 }
+
